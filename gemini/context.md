@@ -1,0 +1,30 @@
+
+# IntelliSFX Project Context
+
+## Project Goal
+To build a web application called "IntelliSFX" that automatically generates layered, contextual soundtracks for videos using multiple AI models.
+
+## Core Functionality
+1.  **Video Upload:** Users can upload videos to the platform.
+2.  **AI Analysis:** The system analyzes the video using Gemini Vision to understand scenes, emotions, and objects.
+3.  **Multi-Model Audio Generation:**
+    *   **Music:** Google Lyria generates background music based on the video's mood and pacing.
+    *   **Sound Effects:** Meta's AudioGen creates sound effects synchronized with visual events.
+4.  **Layered Audio:** The platform produces separate tracks for ambient music and sound effects.
+5.  **Timeline Editor:** Users can fine-tune the generated audio layers in a timeline-based editor.
+6.  **Export:** Users can export the final video with the new soundtrack, including options for stem separation.
+
+## Technical Stack
+*   **Frontend:** Next.js with React, TypeScript, and Tailwind CSS.
+*   **Backend:** Supabase (Postgres database, storage, edge functions, and real-time updates).
+*   **AI Services:**
+    *   Gemini Vision Pro
+    *   Google Lyria
+    *   Meta AudioGen (via Replicate)
+*   **Client-Side Processing:** `ffmpeg.wasm` for merging audio and video.
+*   **State Management:** Zustand.
+
+## Project Structure
+*   The project will follow a standard Next.js App Router structure.
+*   It will include detailed UI/UX design, with a focus on "Invisible Complexity, Visible Progress."
+*   The implementation is planned in five phases, starting with project setup and ending with collaboration features.

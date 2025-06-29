@@ -4,12 +4,12 @@ This document outlines the technical architecture for the IntelliSFX platform, c
 
 ## 1. High-Level Architecture
 
-The system is composed of three main parts: a Next.js frontend, an Appwrite backend, and a set of external AI services.
+The system is composed of three main parts: a Next.js frontend, a Supabase backend, and a set of external AI services.
 
 ```
-[Next.js Frontend] <--> [Appwrite Backend] <--> [External AI Services]
+[Next.js Frontend] <--> [Supabase Backend] <--> [External AI Services]
    (User Interface,      (Database, Storage,      (Gemini, Lyria,
-    Client-Side          Functions, Auth)         AudioGen)
+    Client-Side          Edge Functions, Auth)   AudioGen)
     Processing)
 ```
 
@@ -36,79 +36,79 @@ We will use Zustand for centralized state management, with stores for:
 ### Client-Side Workflow:
 
 1.  **Video Upload:** The user uploads a video using the `VideoUploader` component.
-2.  **Upload to Appwrite:** The original video will be uploaded to Appwrite Storage.
-3.  **Trigger Backend Function:** The frontend will call an Appwrite Function to start the analysis process.
-4.  **Real-time Updates:** The frontend will subscribe to Appwrite's real-time service to receive updates on the project's status.
+2.  **Upload to Supabase:** The original video will be uploaded to Supabase Storage.
+3.  **Trigger Backend Function:** The frontend will call a Supabase Edge Function to start the analysis process.
+4.  **Real-time Updates:** The frontend will subscribe to Supabase's real-time service to receive updates on the project's status.
 5.  **Audio Merging:** Once the audio layers are generated, the frontend will use `ffmpeg.wasm` to merge them with the original video for preview and download.
 
-## 3. Backend (Appwrite)
+## 3. Backend (Supabase)
 
-The backend will be powered by Appwrite, providing all the necessary backend-as-a-service features.
+The backend will be powered by Supabase, providing all the necessary backend-as-a-service features.
 
-### Collections:
+### Tables:
 
 *   **projects:**
-    *   `name` (string)
-    *   `status` (string: "uploaded", "analyzing", "generating", "completed", "failed")
-    *   `videoFileId` (string)
-    *   `ownerId` (string)
+    *   `name` (text)
+    *   `status` (text: "uploaded", "analyzing", "generating", "completed", "failed")
+    *   `video_file_id` (uuid)
+    *   `owner_id` (uuid)
 *   **videos:**
-    *   `projectId` (string)
-    *   `originalFileId` (string)
+    *   `project_id` (uuid)
+    *   `original_file_id` (uuid)
 *   **audio_layers:**
-    *   `projectId` (string)
-    *   `type` (string: "music", "sfx")
-    *   `prompt` (string)
-    *   `audioFileId` (string)
-    *   `startTime` (number)
-    *   `endTime` (number)
+    *   `project_id` (uuid)
+    *   `type` (text: "music", "sfx")
+    *   `prompt` (text)
+    *   `audio_file_id` (uuid)
+    *   `start_time` (float8)
+    *   `end_time` (float8)
 
 ### Storage:
 
 *   **raw_videos:** A bucket to store the original uploaded videos.
 *   **generated_audio:** A bucket to store the generated audio files from the AI models.
 
-### Functions:
+### Edge Functions:
 
-*   **onVideoUpload:**
+*   **on-video-upload:**
     *   Triggered by the frontend after a video is uploaded.
-    *   Creates a new `project` and `video` document in the database.
-    *   Calls the `analyzeVideo` function.
-*   **analyzeVideo:**
+    *   Creates a new `project` and `video` record in the database.
+    *   Calls the `analyze-video` function.
+*   **analyze-video:**
     *   Retrieves the video file from storage.
     *   Calls the Gemini Vision API to analyze the video and generate scene context data.
-    *   Saves the scene context data to the `project` document.
-    *   Calls the `generateMusic` and `generateSfx` functions in parallel.
-*   **generateMusic:**
+    *   Saves the scene context data to the `project` record.
+    *   Calls the `generate-music` and `generate-sfx` functions in parallel.
+*   **generate-music:**
     *   Takes the scene context data as input.
     *   Calls the Google Lyria API to generate a music track.
-    *   Saves the generated music as a new `audio_layer` document.
-*   **generateSfx:**
+    *   Saves the generated music as a new `audio_layer` record.
+*   **generate-sfx:**
     *   Takes the scene context data as input.
     *   Calls the Meta AudioGen API to generate sound effects.
-    *   Saves the generated SFX as new `audio_layer` documents.
+    *   Saves the generated SFX as new `audio_layer` records.
 
 ## 4. AI Integration
 
-*   **Gemini Vision Pro:** Used for scene analysis, object detection, and mood extraction. The API will be called from the `analyzeVideo` function.
-*   **Google Lyria:** Used for generating background music. The API will be called from the `generateMusic` function.
-*   **Meta AudioGen (via Replicate):** Used for generating sound effects. The API will be called from the `generateSfx` function.
+*   **Gemini Vision Pro:** Used for scene analysis, object detection, and mood extraction. The API will be called from the `analyze-video` function.
+*   **Google Lyria:** Used for generating background music. The API will be called from the `generate-music` function.
+*   **Meta AudioGen (via Replicate):** Used for generating sound effects. The API will be called from the `generate-sfx` function.
 
 ## 5. Development Roadmap
 
-1.  **Phase 1: Appwrite Setup & Frontend Scaffolding**
-    *   Set up Appwrite project, collections, and storage.
+1.  **Phase 1: Supabase Setup & Frontend Scaffolding**
+    *   Set up Supabase project, tables, and storage.
     *   Create the Next.js frontend with basic UI components.
     *   Implement user authentication.
-    *   Implement video upload and the `onVideoUpload` function.
+    *   Implement video upload and the `on-video-upload` function.
 2.  **Phase 2: Gemini Integration**
-    *   Implement the `analyzeVideo` function.
+    *   Implement the `analyze-video` function.
     *   Integrate the Gemini Vision Pro API.
     *   Display the analysis results on the frontend.
 3.  **Phase 3: Audio Generation**
-    *   Implement the `generateMusic` and `generateSfx` functions.
+    *   Implement the `generate-music` and `generate-sfx` functions.
     *   Integrate the Lyria and AudioGen APIs.
-    *   Store the generated audio files in Appwrite Storage.
+    *   Store the generated audio files in Supabase Storage.
 4.  **Phase 4: Audio Timeline & Merging**
     *   Implement the `AudioTimeline` component to display the generated audio layers.
     *   Use `ffmpeg.wasm` on the client-side to merge the audio layers with the video.

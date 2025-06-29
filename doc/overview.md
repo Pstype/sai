@@ -23,19 +23,19 @@ Contextual Synchronization: Audio elements are timed and mixed based on video an
 
 
 Technical Architecture
-Frontend (Next.js) with appwrite
+Frontend (Next.js)
 
 User Interface: Intuitive drag-drop video upload with real-time processing visualization
 Project Management: Dashboard for tracking processing status, managing assets, and organizing projects
 Audio Editor: Timeline-based editor for fine-tuning generated audio layers
 Export Tools: Multiple format support with stem separation capabilities
 
-Backend (Appwrite)
+Backend (Supabase)
 
-Database: Project management, user authentication, asset tracking, processing job queues
-Storage: Secure video upload and generated audio asset management
-Functions: Serverless AI model orchestration and processing pipeline
-Real-time: Live status updates during multi-stage processing
+Database (Postgres): Project management, user authentication, asset tracking, and processing job queues.
+Storage: Secure video upload and generated audio asset management.
+Edge Functions: Serverless AI model orchestration and processing pipeline.
+Real-time: Live status updates during multi-stage processing.
 
 AI Processing Pipeline
 Video Upload → Gemini Vision Analysis → Parallel Audio Generation → Synchronization & Mixing → Final Export
