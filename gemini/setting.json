@@ -1,4 +1,11 @@
 {
+  "description": "Core system prompt and project context for IntelliSFX.",
+  "globs": [
+    "gemini/system-prompt.md",
+    "gemini/context.md",
+    "gemini/system.md"
+  ],
+  "alwaysApply": true,
   "mcpServers": {
     "supabase": {
       "command": "cmd",
@@ -12,13 +19,6 @@
       "env": {
         "SUPABASE_ACCESS_TOKEN": "sbp_80334a8b9335a134b52dabfbb3f80cfc41ddd5d6"
       }
-    },
-    "description": "Core system prompt and project context for IntelliSFX.",
-     "globs": [
-        "gemini/system-prompt.md",
-        "gemini/context.md",
-        "gemini/system.md"
-    ],
-    "alwaysApply": true
+    }
   }
 }
