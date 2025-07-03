@@ -4,11 +4,6 @@ import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import ReactPlayer from 'react-player';
 import { FaCloudUploadAlt } from 'react-icons/fa';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = 'https://taincjgzxdarfmbnzbwk.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRhaW5jamd6eGRhcmZtYm56YndrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTExOTk2MjMsImV4cCI6MjA2Njc3NTYyM30.r-zJpa83Y2MH6QSBlnDsmdhhUXGbxIXp-l_QTsORnpg';
-const supabase = createClient(supabaseUrl, supabaseKey);
 
 const VideoUploader = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -17,46 +12,53 @@ const VideoUploader = () => {
   const [showActions, setShowActions] = useState(false);
   const [fadeOutLoading, setFadeOutLoading] = useState(false);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
+    setErrorMsg(null);
     const selectedFile = acceptedFiles[0];
     if (selectedFile && selectedFile.type.startsWith('video/')) {
       setFile(selectedFile);
       setIsUploading(true);
       setUploadProgress(0);
-      const filePath = `videos/${Date.now()}_${selectedFile.name}`;
-      // Get upload URL from Supabase
-      const { data: signedUrlData, error: signedUrlError } = await supabase.storage.from('raw_videos').createSignedUploadUrl(filePath, { expiresIn: 60 });
-      if (signedUrlError || !signedUrlData) {
-        setIsUploading(false);
-        return;
-      }
-      // Upload using XMLHttpRequest for progress
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      formData.append('filename', selectedFile.name);
+      // Use XMLHttpRequest for upload progress
       const xhr = new XMLHttpRequest();
-      xhr.open('PUT', signedUrlData.signedUrl, true);
+      xhr.open('POST', '/api/upload');
       xhr.upload.onprogress = (event) => {
         if (event.lengthComputable) {
-          setUploadProgress(Math.round((event.loaded / event.total) * 100));
+          const percent = Math.round((event.loaded / event.total) * 100);
+          setUploadProgress(percent);
         }
       };
-      xhr.onload = async () => {
+      xhr.onload = () => {
         setIsUploading(false);
         setFadeOutLoading(true);
-        if (xhr.status === 200) {
-          // Get public URL for preview
-          const { data: urlData } = supabase.storage.from('raw_videos').getPublicUrl(filePath);
-          setVideoUrl(urlData.publicUrl);
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            const data = JSON.parse(xhr.responseText);
+            setVideoUrl(data.publicUrl);
+            setTimeout(() => {
+              setShowActions(true);
+              setFadeOutLoading(false);
+            }, 600);
+          } catch (e) {
+            setErrorMsg('Failed to parse server response.');
+          }
+        } else {
+          setErrorMsg('Upload failed: ' + (xhr.responseText || xhr.statusText));
+          setIsUploading(false);
         }
-        setTimeout(() => {
-          setShowActions(true);
-          setFadeOutLoading(false);
-        }, 600);
       };
       xhr.onerror = () => {
         setIsUploading(false);
+        setErrorMsg('Network error during upload.');
       };
-      xhr.setRequestHeader('x-upsert', 'false');
-      xhr.send(selectedFile);
+      xhr.send(formData);
+    } else {
+      setErrorMsg('Please select a valid video file.');
     }
   }, []);
 
@@ -139,6 +141,9 @@ const VideoUploader = () => {
               </button>
             </div>
           </>
+        )}
+        {errorMsg && (
+          <div className="text-red-500 text-center mb-4">{errorMsg}</div>
         )}
       </div>
     </div>

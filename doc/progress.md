@@ -34,6 +34,14 @@ alwaysApply: true
 - Linter/type issues with `react-player` resolved by adding a local type declaration.
 - Deferred resumable uploads for now; current implementation is robust for standard uploads.
 
+### [2024-06-11] Supabase Security & API Refactor
+- Removed hardcoded Supabase credentials from all client-side code.
+- Refactored `VideoUploader` to upload videos via a secure Next.js API route (`/api/upload`).
+- Supabase credentials are now loaded from environment variables on the server only.
+- Added server-side logic to handle uploads and return public URLs securely.
+- Provided SQL and guidance for enabling Row Level Security (RLS) on the `storage.objects` table in Supabase, restricting uploads and reads to authenticated users only.
+- Next step: Apply RLS policies directly in the Supabase dashboard due to permission limitations in automated migrations.
+
 ## [Next Step]
 - Implement resumable uploads with a real progress bar for large files (using tus-js-client or Uppy with Supabase's resumable upload endpoint).
 - Integrate the resumable upload library into the VideoUploader component.
