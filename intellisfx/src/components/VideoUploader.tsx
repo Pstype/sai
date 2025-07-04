@@ -21,42 +21,45 @@ const VideoUploader = () => {
       setFile(selectedFile);
       setIsUploading(true);
       setUploadProgress(0);
-      const formData = new FormData();
-      formData.append('file', selectedFile);
-      formData.append('filename', selectedFile.name);
-      // Use XMLHttpRequest for upload progress
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', '/api/upload');
-      xhr.upload.onprogress = (event) => {
-        if (event.lengthComputable) {
-          const percent = Math.round((event.loaded / event.total) * 100);
-          setUploadProgress(percent);
+      try {
+        // Step A: Get the signed upload URL from our API
+        const res = await fetch('/api/upload-url', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fileName: selectedFile.name }),
+        });
+        const { signedUrl, filePath, error } = await res.json();
+        if (!res.ok || !signedUrl) {
+          setErrorMsg(error || 'Failed to get signed upload URL.');
+          setIsUploading(false);
+          return;
         }
-      };
-      xhr.onload = () => {
+        // Step B: Upload the file directly to Supabase using PUT
+        const uploadRes = await fetch(signedUrl, {
+          method: 'PUT',
+          headers: { 'Content-Type': selectedFile.type },
+          body: selectedFile,
+        });
+        if (!uploadRes.ok) {
+          setErrorMsg('Failed to upload file to Supabase.');
+          setIsUploading(false);
+          return;
+        }
+        setUploadProgress(100);
         setIsUploading(false);
         setFadeOutLoading(true);
-        if (xhr.status >= 200 && xhr.status < 300) {
-          try {
-            const data = JSON.parse(xhr.responseText);
-            setVideoUrl(data.publicUrl);
-            setTimeout(() => {
-              setShowActions(true);
-              setFadeOutLoading(false);
-            }, 600);
-          } catch (e) {
-            setErrorMsg('Failed to parse server response.');
-          }
-        } else {
-          setErrorMsg('Upload failed: ' + (xhr.responseText || xhr.statusText));
-          setIsUploading(false);
-        }
-      };
-      xhr.onerror = () => {
+        // Step C: Construct and log the public URL
+        const publicUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/raw_videos/${filePath}`;
+        setVideoUrl(publicUrl);
+        console.log('Video public URL:', publicUrl);
+        setTimeout(() => {
+          setShowActions(true);
+          setFadeOutLoading(false);
+        }, 600);
+      } catch (e: any) {
+        setErrorMsg(e.message || 'Unexpected error during upload.');
         setIsUploading(false);
-        setErrorMsg('Network error during upload.');
-      };
-      xhr.send(formData);
+      }
     } else {
       setErrorMsg('Please select a valid video file.');
     }

@@ -42,6 +42,14 @@ alwaysApply: true
 - Provided SQL and guidance for enabling Row Level Security (RLS) on the `storage.objects` table in Supabase, restricting uploads and reads to authenticated users only.
 - Next step: Apply RLS policies directly in the Supabase dashboard due to permission limitations in automated migrations.
 
+## [Date: YYYY-MM-DD] Video Upload Refactor Complete
+- Switched video upload to use Supabase signed URLs for direct-to-storage uploads.
+- Created new API route at `src/app/api/upload-url/route.ts` for generating signed upload URLs.
+- Updated `VideoUploader.tsx` to use the new signed URL flow (request, upload, log public URL).
+- Deleted old upload API route and logic.
+- Removed `bodySizeLimit` config from `next.config.ts` as large payloads are no longer sent to the server.
+- Now supports large video uploads without 'Payload Too Large' errors.
+
 ## [Next Step]
 - Implement resumable uploads with a real progress bar for large files (using tus-js-client or Uppy with Supabase's resumable upload endpoint).
 - Integrate the resumable upload library into the VideoUploader component.
