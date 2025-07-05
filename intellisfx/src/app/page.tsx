@@ -1,4 +1,4 @@
-import VideoUploader from '../components/VideoUploader';
+import VideoUploader from '../components/DynamicVideoUploader';
 
 export default function Home() {
   return (

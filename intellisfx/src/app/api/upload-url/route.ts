@@ -32,18 +32,18 @@ export async function POST(req: NextRequest) {
     const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9.\-_]/g, '_');
     const filePath = `videos/${Date.now()}-${sanitizedFileName}`;
 
-    // Generate signed upload URL
+    // Generate signed upload URL (correct method)
     const { data, error } = await supabase.storage
       .from('raw_videos')
-      .createSignedUploadUrl(filePath, 60 * 10); // 10 minutes expiry
+      .createSignedUploadUrl(filePath, { upsert: true });
 
     if (error || !data) {
-      console.error('Supabase signed URL error:', error);
-      return NextResponse.json({ error: error?.message || 'Failed to generate signed URL' }, { status: 500 });
+      console.error('Supabase signed upload URL error:', error);
+      return NextResponse.json({ error: error?.message || 'Failed to generate signed upload URL' }, { status: 500 });
     }
 
-    console.log('Signed URL generated:', data.signedUrl);
-    return NextResponse.json({ signedUrl: data.signedUrl, filePath });
+    // Return path and token for client-side upload
+    return NextResponse.json({ path: data.path, token: data.token });
   } catch (err: any) {
     console.error('API error:', err);
     return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 });

@@ -5,6 +5,8 @@ import { useDropzone } from 'react-dropzone';
 import ReactPlayer from 'react-player';
 import { FaCloudUploadAlt } from 'react-icons/fa';
 
+const EDGE_FUNCTION_URL = 'https://taincjgzxdarfmbnzbwk.functions.supabase.co/public-video-upload-with-cors';
+
 const VideoUploader = () => {
   const [file, setFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -22,36 +24,24 @@ const VideoUploader = () => {
       setIsUploading(true);
       setUploadProgress(0);
       try {
-        // Step A: Get the signed upload URL from our API
-        const res = await fetch('/api/upload-url', {
+        // Step A: Upload file to Supabase Edge Function
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+        const res = await fetch(EDGE_FUNCTION_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ fileName: selectedFile.name }),
+          body: formData,
         });
-        const { signedUrl, filePath, error } = await res.json();
-        if (!res.ok || !signedUrl) {
-          setErrorMsg(error || 'Failed to get signed upload URL.');
-          setIsUploading(false);
-          return;
-        }
-        // Step B: Upload the file directly to Supabase using PUT
-        const uploadRes = await fetch(signedUrl, {
-          method: 'PUT',
-          headers: { 'Content-Type': selectedFile.type },
-          body: selectedFile,
-        });
-        if (!uploadRes.ok) {
-          setErrorMsg('Failed to upload file to Supabase.');
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          setErrorMsg(data.error || 'Failed to upload video.');
           setIsUploading(false);
           return;
         }
         setUploadProgress(100);
         setIsUploading(false);
         setFadeOutLoading(true);
-        // Step C: Construct and log the public URL
-        const publicUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/raw_videos/${filePath}`;
-        setVideoUrl(publicUrl);
-        console.log('Video public URL:', publicUrl);
+        // Step B: Use the returned public URL
+        setVideoUrl(data.url);
         setTimeout(() => {
           setShowActions(true);
           setFadeOutLoading(false);

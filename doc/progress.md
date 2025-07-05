@@ -42,6 +42,18 @@ alwaysApply: true
 - Provided SQL and guidance for enabling Row Level Security (RLS) on the `storage.objects` table in Supabase, restricting uploads and reads to authenticated users only.
 - Next step: Apply RLS policies directly in the Supabase dashboard due to permission limitations in automated migrations.
 
+## [Date: YYYY-MM-DD] Video Upload Frontend Refactor
+
+- Migrated the video upload frontend to POST directly to the Supabase Edge Function endpoint (`https://taincjgzxdarfmbnzbwk.functions.supabase.co/public-video-upload-with-cors`).
+- Removed all Supabase client and signed URL logic from the frontend.
+- The upload flow now:
+  - Accepts a video file from the user.
+  - Sends the file as `multipart/form-data` to the Edge Function.
+  - Receives the public URL of the uploaded video from the Edge Function response.
+  - Displays the uploaded video using the returned URL.
+- All backend upload logic, validation, and CORS are handled by the Edge Function (managed by Supabase agent).
+- No backend code or API route is required in the Next.js app for uploads.
+
 ## [Date: YYYY-MM-DD] Video Upload Refactor Complete
 - Switched video upload to use Supabase signed URLs for direct-to-storage uploads.
 - Created new API route at `src/app/api/upload-url/route.ts` for generating signed upload URLs.
