@@ -5,7 +5,7 @@ import { useDropzone } from 'react-dropzone';
 import ReactPlayer from 'react-player';
 import { FaCloudUploadAlt } from 'react-icons/fa';
 
-const EDGE_FUNCTION_URL = 'https://taincjgzxdarfmbnzbwk.functions.supabase.co/public-video-upload-with-cors';
+const EDGE_FUNCTION_URL = process.env.NEXT_PUBLIC_SUPABASE_FUNCTION_URL || 'https://taincjgzxdarfmbnzbwk.functions.supabase.co/public-video-upload-with-cors';
 
 const VideoUploader = () => {
   const [file, setFile] = useState<File | null>(null);
