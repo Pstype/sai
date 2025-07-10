@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+
 import { useParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -118,7 +118,7 @@ export default function ExportPage() {
     for (const stage of stages) {
       setExportProgress(prev => ({ ...prev, stage: stage.name }));
       
-      const startProgress = totalProgress;
+      
       const endProgress = totalProgress + progressPerStage;
       
       await new Promise(resolve => {

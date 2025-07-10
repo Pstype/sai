@@ -14,22 +14,18 @@ import {
   Trash2,
   Archive,
   Share2,
-  MoreHorizontal,
   CheckSquare,
   Square,
   Filter,
   SortAsc,
-  Search,
   FolderOpen,
   Music,
   Clock,
   Users,
-  TrendingUp,
-  AlertCircle,
-  Star
+  TrendingUp
 } from 'lucide-react'
-import type { Project, ProjectStatus } from '@/types'
-import { useProjectStore, useProjects } from '@/stores/projects'
+
+
 
 // Mock data for project analytics
 const mockProjectStats = {

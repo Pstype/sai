@@ -13,7 +13,7 @@ import {
   Music, 
   Edit, 
   Download, 
-  Play, 
+   
   Calendar, 
   Clock, 
   FileVideo, 
@@ -94,14 +94,7 @@ export default function ProjectPage() {
   const router = useRouter();
   const projectId = params.id as string;
   
-  const { 
-    projects, 
-    currentProject, 
-    isLoading, 
-    error, 
-    fetchProjects, 
-    setCurrentProject 
-  } = useProjectsStore();
+  
 
   const [project, setProject] = useState<Project | null>(null);
   const [notFound, setNotFound] = useState(false);
@@ -177,7 +170,7 @@ export default function ProjectPage() {
               <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
               <h2 className="text-2xl font-bold mb-2">Project Not Found</h2>
               <p className="text-muted-foreground mb-6">
-                The project you're looking for doesn't exist or has been deleted.
+                The project you are looking for does not exist or has been deleted.
               </p>
               <Button onClick={() => router.push('/projects')}>
                 <ArrowLeft className="h-4 w-4 mr-2" />

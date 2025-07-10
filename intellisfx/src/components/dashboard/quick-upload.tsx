@@ -43,7 +43,7 @@ export function QuickUpload({ onProjectCreated, className }: QuickUploadProps) {
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(null)
 
   // Handle file drop/selection for quick upload
-  const onDrop = useCallback(async (acceptedFiles: File[], rejectedFiles: any[]) => {
+  const onDrop = useCallback(async (acceptedFiles: File[], rejectedFiles: FileRejection[]) => {
     if (rejectedFiles.length > 0) {
       console.error('File rejected:', rejectedFiles[0].errors)
       return
@@ -90,11 +90,7 @@ export function QuickUpload({ onProjectCreated, className }: QuickUploadProps) {
   })
 
   // Handle upload completion
-  const handleUploadComplete = useCallback((videoUrl: string) => {
-    if (currentProjectId) {
-      onProjectCreated?.(currentProjectId)
-    }
-  }, [currentProjectId, onProjectCreated])
+  
 
   // Handle cancel
   const handleCancel = useCallback(() => {
@@ -103,11 +99,7 @@ export function QuickUpload({ onProjectCreated, className }: QuickUploadProps) {
   }, [])
 
   // Handle proceed
-  const handleProceed = useCallback((videoUrl: string) => {
-    if (currentProjectId) {
-      onProjectCreated?.(currentProjectId)
-    }
-  }, [currentProjectId, onProjectCreated])
+  
 
   // If uploader is shown, render the VideoUploader component
   if (showUploader && currentProjectId) {

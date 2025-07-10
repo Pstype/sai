@@ -381,7 +381,7 @@ export interface AudioContext {
 
 export interface RealtimeEvent {
   type: string
-  payload: any
+  payload: unknown
   timestamp: Date
 }
 
@@ -477,7 +477,7 @@ export interface ProcessingWebhook {
   progress: number
   result?: {
     audioUrl?: string
-    analysisData?: any
+    analysisData?: unknown
     error?: string
   }
 }

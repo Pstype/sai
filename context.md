@@ -1,16 +1,14 @@
 @context
 
 # Short-Term Memory
-- The IntelliSFX project now has a comprehensive and functional frontend foundation.
-- The implementation includes a sophisticated dashboard, a complete UI component library, robust state management with Zustand, and a modern design system.
-- Key features implemented:
-    - A robust video upload system using Supabase signed URLs.
-    - A project management dashboard for viewing and organizing projects.
-    - Visualization for the multi-stage processing pipeline.
-    - A complete user workflow with dedicated pages for upload, generation, editing, and exporting.
-- The component architecture is modular, and state management is cleanly separated by domain.
-- Supabase is integrated for storage, with configuration managed via environment variables.
-- The immediate next step is to fix configuration issues (missing dependencies, broken imports, Supabase setup) and complete route implementation before proceeding with backend AI integration.
+- The IntelliSFX project has a complete frontend and a backend with deployed Edge Functions.
+- The backend was built using the "Asynchronous Assembly Line" architecture with Supabase Edge Functions.
+- Key backend components implemented:
+    - Database migrations for `processing_jobs` and `video_analysis` tables.
+    - RLS policies for all tables.
+    - Edge Functions for each stage of the processing pipeline: `on-video-upload`, `analyze-chunk`, `generate-music`, `generate-sfx-batch`, `finalize-project`.
+- A workaround was used for Edge Function deployment by embedding shared code directly into each function.
+- The immediate next step is to integrate the AI services and connect the frontend to the real-time backend.
 
 # Long-Term Memory
 - Core innovation: Layered audio generation, intelligent scene understanding, professional workflow integration, contextual synchronization.

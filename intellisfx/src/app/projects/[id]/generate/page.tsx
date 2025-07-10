@@ -459,7 +459,7 @@ export default function GeneratePage() {
                       <h4 className="font-medium text-foreground mb-1">Music Prompts</h4>
                       <p className="text-muted-foreground">
                         Be specific about instruments, genre, and emotion. 
-                        Example: "Gentle piano melody with soft strings, peaceful and contemplative"
+                        Example: &quot;Gentle piano melody with soft strings, peaceful and contemplative&quot;
                       </p>
                     </div>
                     <div>
@@ -476,7 +476,7 @@ export default function GeneratePage() {
                       <h4 className="font-medium text-foreground mb-1">SFX Prompts</h4>
                       <p className="text-muted-foreground">
                         Describe the action and environment clearly. 
-                        Example: "Heavy footsteps on wooden stairs, echoing"
+                        Example: &quot;Heavy footsteps on wooden stairs, echoing&quot;
                       </p>
                     </div>
                     <div>

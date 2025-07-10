@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+
 import { useParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -156,11 +156,7 @@ export default function EditPage() {
     ));
   };
 
-  const updateTrackVolume = (trackId: string, volume: number) => {
-    setTracks(prev => prev.map(track => 
-      track.id === trackId ? { ...track, volume } : track
-    ));
-  };
+  
 
   // AI Chat
   const handleSendMessage = () => {
@@ -425,7 +421,7 @@ export default function EditPage() {
 
               {/* Track Timeline */}
               <div className="flex-1 relative">
-                {tracks.map((track, index) => (
+                {tracks.map((track) => (
                   <div
                     key={track.id}
                     className="h-16 border-b border-gray-800 relative flex items-center px-4"

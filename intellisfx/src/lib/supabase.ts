@@ -118,7 +118,7 @@ export function unsubscribeFromProject() {
 
 // --- NEW EDGE FUNCTION TRIGGERS ---
 
-async function triggerEdgeFunction(functionName: string, payload: any) {
+async function triggerEdgeFunction(functionName: string, payload: { [key: string]: any }) {
     const { data, error } = await supabase.functions.invoke(functionName, {
         body: payload,
     });

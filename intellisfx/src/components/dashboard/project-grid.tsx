@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react'
-import { useProjectStore, useProjects, useProjectLoading, useProjectError } from '@/stores/projects'
+
 import { ProjectCard } from './project-card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -55,16 +55,7 @@ export function ProjectGrid({ className, onCreateProject, onProjectSelect }: Pro
   const isLoading = useProjectLoading()
   const error = useProjectError()
   
-  const { 
-    fetchProjects, 
-    setFilters, 
-    clearFilters, 
-    loadMore, 
-    filters,
-    hasMore,
-    totalCount,
-    clearError
-  } = useProjectStore()
+  
 
   // Local UI state
   const [viewMode, setViewMode] = useState<ViewMode>('grid')
@@ -92,7 +83,7 @@ export function ProjectGrid({ className, onCreateProject, onProjectSelect }: Pro
     
     setFilters(newFilters)
     fetchProjects(newFilters)
-  }, [searchQuery, selectedStatuses, sortBy, setFilters, fetchProjects])
+  }, [searchQuery, selectedStatuses, sortBy])
 
   // Filtered and sorted projects
   const filteredProjects = useMemo(() => {

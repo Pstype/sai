@@ -157,7 +157,7 @@ export default function UploadPage() {
   const { currentProject, setCurrentProject, updateProject } = useProjectsStore()
   const { jobs, getJobsByProject } = useProcessingStore()
   const isProcessing = useIsProcessing()
-  const currentJob = useCurrentJob()
+  
 
   const [videoUrl, setVideoUrl] = useState<string | null>(null)
   const [uploadComplete, setUploadComplete] = useState(false)
@@ -206,10 +206,7 @@ export default function UploadPage() {
   }, [currentProject, updateProject, setCurrentProject])
 
   // Handle proceeding to analysis
-  const handleProceedToAnalysis = useCallback(async (url: string) => {
-    // The processing pipeline should already be started by the VideoUploader
-    // We just need to monitor for completion
-  }, [])
+  
 
   // Monitor analysis completion
   useEffect(() => {
@@ -335,8 +332,7 @@ export default function UploadPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <p className="text-text-secondary">
-                    Your video has been successfully analyzed. We've identified scenes, 
-                    emotions, and generated audio recommendations.
+                    Your video has been successfully analyzed. We have identified scenes, emotions, and generated audio recommendations.
                   </p>
                   <div className="flex items-center gap-3">
                     <Button
