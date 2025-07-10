@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSignedUploadUrl, STORAGE_BUCKETS } from '@/lib/supabase'
+import { getSignedUploadUrl } from '@/lib/supabase'
 import { z } from 'zod'
 
 // Request validation schema
@@ -25,7 +25,6 @@ interface ErrorResponse {
 
 // File validation constants
 const MAX_FILE_SIZE = 1024 * 1024 * 1024 // 1GB
-const MAX_VIDEO_DURATION = 10 * 60 // 10 minutes in seconds
 const ALLOWED_VIDEO_TYPES = [
   'video/mp4',
   'video/webm',
@@ -36,7 +35,6 @@ const ALLOWED_VIDEO_TYPES = [
 const ALLOWED_AUDIO_TYPES = [
   'audio/mpeg',
   'audio/wav',
-  'audio/mp3',
   'audio/ogg',
   'audio/aac'
 ]
@@ -59,7 +57,6 @@ function validateFileType(fileType: string, bucket: string): boolean {
 function generateFilePath(fileName: string, bucket: string): string {
   const timestamp = Date.now()
   const randomId = Math.random().toString(36).substring(2, 15)
-  const fileExtension = fileName.split('.').pop()
   const sanitizedName = fileName
     .replace(/[^a-zA-Z0-9.-]/g, '_')
     .substring(0, 100) // Limit filename length
@@ -132,15 +129,16 @@ export async function POST(request: NextRequest) {
 
     // Handle Supabase errors
     if (error instanceof Error) {
+    // Handle Supabase errors
+    if (error instanceof Error) {
       return NextResponse.json(
         {
           error: 'SUPABASE_ERROR',
-          message: error.message
+          message: 'Failed to generate upload URL. Please try again.'
         } as ErrorResponse,
         { status: 500 }
       )
     }
-
     // Handle unknown errors
     return NextResponse.json(
       {

@@ -1,10 +1,11 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  experimental: {
-    serverActions: {
-      // bodySizeLimit: '1gb', // Removed as uploads now use signed URLs
-    },
-  },
-};
+  import type { NextConfig } from 'next';
 
-export default nextConfig;
+  const nextConfig: NextConfig = {
+    experimental: {
+      serverActions: {
+        // bodySizeLimit: '1gb', // Removed as uploads now use signed URLs
+      },
+    },
+  };
+
+  export default nextConfig;

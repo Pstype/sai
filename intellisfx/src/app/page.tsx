@@ -12,7 +12,6 @@ import {
   Zap, 
   Music, 
   Volume2, 
-  Clock, 
   TrendingUp,
   Plus,
   ArrowRight,
