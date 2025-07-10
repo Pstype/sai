@@ -20,6 +20,13 @@ alwaysApply: true
 
 # Progress Log
 
+## [2025-07-09] Project Restart
+- Restarted the `intellisfx` project from scratch to establish a clean baseline.
+- Removed all existing source code, build artifacts, and public assets.
+- Kept essential configuration files (`package.json`, `.env`, `next.config.ts`, etc.) and `node_modules`.
+- Created a new minimal Next.js application structure under `src/`.
+- The application now displays a simple welcome page.
+
 ## [Current Step]
 - Minimalist, distraction-free UI for video upload is complete.
 - Users can upload videos up to 10 minutes (1GB) directly to Supabase Storage (raw_videos bucket).

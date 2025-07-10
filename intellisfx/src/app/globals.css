@@ -1,27 +1,25 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
-  --background: #fafafa;
-  --foreground: #171717;
-  --accent-pink: #ffb6d5;
+  --primary: 262 86% 61%;
+  --success: 145 75% 45%;
+  --warning: 45 93% 55%;
+  --error: 0 84% 60%;
+  --info: 210 89% 61%;
+  
+  --background: 240 10% 3.9%;
+  --surface: 240 4.8% 8.2%;
+  --text: 240 5% 95.9%;
+  --border: 240 3.7% 15.9%;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0e0c13;
-    --foreground: #ededed;
+@layer base {
+  * {
+    @apply border-border;
   }
-}
-
-body {
-  background: linear-gradient(135deg, #fdf6f9 0%, #f5faff 100%);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  body {
+    @apply bg-background text-text;
+  }
 }

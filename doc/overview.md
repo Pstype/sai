@@ -37,12 +37,14 @@ Storage: Secure video upload and generated audio asset management.
 Edge Functions: Serverless AI model orchestration and processing pipeline.
 Real-time: Live status updates during multi-stage processing.
 
-AI Processing Pipeline
-Video Upload → Gemini Vision Analysis → Parallel Audio Generation → Synchronization & Mixing → Final Export
-                     ↓                           ↓
-               Scene Context Data        Lyria Music + AudioGen SFX
-                     ↓                           ↓
-               Timing & Mood Mapping    Contextual Audio Layers
+AI Processing Pipeline: The Asynchronous Assembly Line
+Video Upload → Video Chunking → Parallel Chunk Analysis (Gemini) → Parallel Audio Generation (Lyria/AudioGen) → Timeline Assembly → Final Export
+
+1.  **Video Upload & Chunking**: The video is broken into smaller, manageable chunks to handle processing constraints.
+2.  **Parallel Analysis**: Each chunk is analyzed by Gemini Vision in parallel to extract scene context, mood, and events.
+3.  **Parallel Audio Generation**: Based on the analysis, Lyria generates a cohesive music track while AudioGen creates batches of sound effects in parallel.
+4.  **Timeline Assembly**: The system automatically synchronizes the generated music and SFX tracks with the video timeline, presenting a complete "Instant First Draft" to the user.
+5.  **Interactive Refinement & Final Export**: The user refines the draft on the client-side, and the final high-quality render is handled by the backend.
 External Integrations
 
 Google AI APIs: Gemini Vision Pro, Lyria (Music Generation)

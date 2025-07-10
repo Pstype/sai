@@ -68,25 +68,33 @@ The backend will be powered by Supabase, providing all the necessary backend-as-
 *   **raw_videos:** A bucket to store the original uploaded videos.
 *   **generated_audio:** A bucket to store the generated audio files from the AI models.
 
-### Edge Functions:
+### Edge Functions: The Asynchronous Assembly Line
+
+The backend logic is orchestrated through a series of chained, event-driven Edge Functions to create an "Asynchronous Assembly Line" for processing videos. This avoids function timeouts and manages API limitations gracefully.
 
 *   **on-video-upload:**
     *   Triggered by the frontend after a video is uploaded.
     *   Creates a new `project` and `video` record in the database.
-    *   Calls the `analyze-video` function.
-*   **analyze-video:**
-    *   Retrieves the video file from storage.
-    *   Calls the Gemini Vision API to analyze the video and generate scene context data.
-    *   Saves the scene context data to the `project` record.
-    *   Calls the `generate-music` and `generate-sfx` functions in parallel.
+    *   Initiates the video chunking process.
+*   **analyze-chunk (Loop):**
+    *   Takes a video chunk as input.
+    *   Calls the Gemini Vision API to analyze the chunk and generate scene context data.
+    *   Saves the scene context data.
+    *   This function is called in a loop for all chunks.
 *   **generate-music:**
-    *   Takes the scene context data as input.
+    *   Triggered after all chunks are analyzed.
+    *   Takes the complete scene context data as input.
     *   Calls the Google Lyria API to generate a music track.
     *   Saves the generated music as a new `audio_layer` record.
-*   **generate-sfx:**
-    *   Takes the scene context data as input.
-    *   Calls the Meta AudioGen API to generate sound effects.
+*   **generate-sfx-batch (Batched Parallel):**
+    *   Triggered after all chunks are analyzed.
+    *   Gathers all required SFX prompts and groups them into small batches.
+    *   This function is invoked in parallel for each batch.
+    *   Calls the Meta AudioGen API to generate sound effects for the batch.
     *   Saves the generated SFX as new `audio_layer` records.
+*   **finalize-project:**
+    *   Verifies that all analysis and generation jobs are complete.
+    *   Updates the project status to "completed", signaling the frontend to display the final timeline.
 
 ## 4. AI Integration
 

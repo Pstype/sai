@@ -7,25 +7,18 @@ alwaysApply: false
 
 ## Design Philosophy
 
-**"Invisible Complexity, Visible Progress"**
+**"Instant First Draft, Infinite Refinements"**
 
-The interface should hide the sophisticated multi-model AI orchestration while making the creative process transparent and controllable. Users should feel like they're collaborating with an intelligent audio assistant, not wrestling with complex AI systems.
+The interface should provide an immediate, fully-formed audio draft, making the user feel like they are collaborating with an AI partner from the very start. The complexity of the backend is hidden, but the creative process is transparent and highly controllable through intuitive tools and conversational AI.
 
 ---
 
 ## Core UX Principles
 
-### 1. Progressive Disclosure
-Start simple → Reveal complexity as needed → Expert shortcuts available
-
-### 2. Process Transparency  
-Every AI step visible → Clear progress indicators → Understandable failure states
-
-### 3. Creative Control
-AI suggestions → Human refinement → Professional output
-
-### 4. Workflow Integration
-Familiar creative tool patterns → Export to existing pipelines → Collaborative features
+1.  **Instant Gratification**: Deliver a complete, synchronized audio draft immediately after processing.
+2.  **Process Transparency**: Clearly visualize the multi-stage AI process (Analyzing, Generating Music, etc.) to keep the user engaged and informed.
+3.  **Conversational Control**: Allow users to refine the AI's work through natural language chat, in addition to traditional timeline editing.
+4.  **Progressive Disclosure**: Start with the complete draft, then allow users to dive into the details of each track and element as needed.
 
 ---
 
@@ -200,18 +193,19 @@ app/
 ╰───────────────────────────────┴─────────────╯
 ```
 
-### 4. Timeline Editor - Professional Control (`/projects/[id]/edit`)
+### 4. Timeline Editor - Professional Control & AI Collaboration (`/projects/[id]/edit`)
 
-**Layout**: Familiar DAW-style interface with video sync
-**Video Track**: Top timeline with scene markers
-**Audio Tracks**: Layered music, SFX, ambient with individual controls
-**Inspector Panel**: Selected element properties and AI insights
+**Layout**: Familiar DAW-style interface with an integrated AI chat panel.
+**Video Track**: Top timeline with scene markers.
+**Audio Tracks**: Layered music, SFX, ambient with individual controls.
+**Inspector Panel**: Selected element properties and AI insights.
+**AI Chat Panel**: A conversational interface to Gemini for making adjustments.
 
 **Key Features**:
-- **Magnetic Timeline**: AI-suggested sync points
-- **Smart Crossfades**: Automatic transitions between segments
-- **Volume Automation**: Scene-based level adjustments
-- **AI Coaching**: Contextual suggestions for improvements
+- **Magnetic Timeline**: AI-suggested sync points.
+- **Smart Crossfades**: Automatic transitions between segments.
+- **Volume Automation**: Scene-based level adjustments.
+- **AI Coaching & Chat**: Get contextual suggestions and use natural language to make changes (e.g., "Make the music in this scene more dramatic", "add a whoosh sound when the car passes").
 
 **Timeline Tools**:
 - Razor tool for splitting segments
