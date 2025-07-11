@@ -12,6 +12,7 @@ interface AuthActions {
   login: (email: string, passowrd: string) => Promise<void>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
+  signUp: (email: string, passowrd: string) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState & AuthActions>((set) => ({
@@ -39,6 +40,21 @@ export const useAuthStore = create<AuthState & AuthActions>((set) => ({
       set({ user: session.user as User, isLoading: false });
     } else {
       set({ user: null, isLoading: false });
+    }
+  },
+  signUp: async (email, password) => {
+    set({ isLoading: true, error: null });
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/`,
+      },
+    });
+    if (error) {
+      set({ error: error.message, isLoading: false });
+    } else if (data.user) {
+      set({ user: data.user as User, isLoading: false });
     }
   },
 }));

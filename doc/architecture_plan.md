@@ -37,15 +37,17 @@ We will use Zustand for centralized state management, with stores for:
 
 1.  **Video Upload:** The user uploads a video using the `VideoUploader` component.
 2.  **Upload to Supabase:** The original video will be uploaded to Supabase Storage.
-3.  **Trigger Backend Function:** The frontend will call a Supabase Edge Function to start the analysis process.
+3.  **Trigger Backend Function:** The frontend will call a Next.js API route to start the analysis process.
 4.  **Real-time Updates:** The frontend will subscribe to Supabase's real-time service to receive updates on the project's status.
 5.  **Audio Merging:** Once the audio layers are generated, the frontend will use `ffmpeg.wasm` to merge them with the original video for preview and download.
 
-## 3. Backend (Supabase)
+## 3. Backend Architecture
 
-The backend will be powered by Supabase, providing all the necessary backend-as-a-service features.
+The backend comprises two parts: Supabase services for data storage and authentication, and Next.js API routes for all video processing logic.
 
-### Tables:
+### 3.1 Supabase (Database & Storage)
+
+#### Tables:
 
 *   **projects:**
     *   `name` (text)
@@ -63,61 +65,97 @@ The backend will be powered by Supabase, providing all the necessary backend-as-
     *   `start_time` (float8)
     *   `end_time` (float8)
 
-### Storage:
+#### Storage:
 
 *   **raw_videos:** A bucket to store the original uploaded videos.
 *   **generated_audio:** A bucket to store the generated audio files from the AI models.
 
-### Edge Functions: The Asynchronous Assembly Line
+### 3.2 API Routes (Node.js)
 
-The backend logic is orchestrated through a series of chained, event-driven Edge Functions to create an "Asynchronous Assembly Line" for processing videos. This avoids function timeouts and manages API limitations gracefully.
+All backend processing functions have been migrated from Supabase Edge Functions (Deno runtime) to Next.js API routes (Node.js runtime). This provides:
 
-*   **on-video-upload:**
-    *   Triggered by the frontend after a video is uploaded.
-    *   Creates a new `project` and `video` record in the database.
-    *   Initiates the video chunking process.
-*   **analyze-chunk (Loop):**
-    *   Takes a video chunk as input.
-    *   Calls the Gemini Vision API to analyze the chunk and generate scene context data.
-    *   Saves the scene context data.
-    *   This function is called in a loop for all chunks.
-*   **generate-music:**
-    *   Triggered after all chunks are analyzed.
-    *   Takes the complete scene context data as input.
-    *   Calls the Google Lyria API to generate a music track.
-    *   Saves the generated music as a new `audio_layer` record.
-*   **generate-sfx-batch (Batched Parallel):**
-    *   Triggered after all chunks are analyzed.
-    *   Gathers all required SFX prompts and groups them into small batches.
-    *   This function is invoked in parallel for each batch.
-    *   Calls the Meta AudioGen API to generate sound effects for the batch.
-    *   Saves the generated SFX as new `audio_layer` records.
-*   **finalize-project:**
-    *   Verifies that all analysis and generation jobs are complete.
-    *   Updates the project status to "completed", signaling the frontend to display the final timeline.
+*   A unified Node.js environment for both frontend and backend code.
+*   Direct use of the Supabase JavaScript client with service role key.
+*   Per-route timeout configuration for long-running operations.
+
+#### Environment Variables
+
+Define the following in `.env.local` (also documented in `.env.local.example`):
+
+*   SUPABASE_URL: Your Supabase project URL.
+*   SUPABASE_SERVICE_ROLE_KEY: Service role key for server-side operations.
+*   SUPABASE_ANON_KEY: Public key for client-side interactions (if needed).
+
+#### API Endpoint Structure
+
+The processing endpoints are implemented under `src/app/api`:
+
+*   **POST /api/on-video-upload**  
+    File: `src/app/api/on-video-upload/route.ts`  
+    - Parses `VideoUploadRequest`  
+    - Creates project and video records  
+    - Initiates the processing job  
+
+*   **POST /api/analyze-chunk**  
+    File: `src/app/api/analyze-chunk/route.ts`  
+    - Parses `ChunkAnalysisRequest`  
+    - Calls AI client to analyze video chunk  
+    - Inserts scene context data and updates job progress  
+
+*   **POST /api/generate-music**  
+    File: `src/app/api/generate-music/route.ts`  
+    - Parses `MusicGenerationRequest`  
+    - Calls AI client to generate background music  
+    - Inserts music layer and advances job stage to “generating_sfx”  
+
+*   **POST /api/generate-sfx-batch**  
+    File: `src/app/api/generate-sfx-batch/route.ts`  
+    - Parses `SFXGenerationRequest`  
+    - Calls AI client to generate SFX in batches  
+    - Inserts SFX layers and advances job stage to “mixing”  
+
+*   **POST /api/finalize-project**  
+    File: `src/app/api/finalize-project/route.ts`  
+    - Parses `projectId`  
+    - Updates project status to “completed” and marks job as done  
+
+#### Timeout Configuration
+
+Next.js API routes have a default timeout of 60 seconds. To match the original Supabase Edge Function settings, we extend the timeout to 300 seconds (5 minutes) for the long-running routes (`generate-music` and `generate-sfx-batch`) via `next.config.ts`:
+
+```js
+// next.config.ts
+const nextConfig = {
+  api: {
+    responseLimit: false,
+    timeout: 300_000, // 300 seconds
+  },
+};
+module.exports = nextConfig;
+```
 
 ## 4. AI Integration
 
-*   **Gemini Vision Pro:** Used for scene analysis, object detection, and mood extraction. The API will be called from the `analyze-video` function.
-*   **Google Lyria:** Used for generating background music. The API will be called from the `generate-music` function.
-*   **Meta AudioGen (via Replicate):** Used for generating sound effects. The API will be called from the `generate-sfx` function.
+*   **Gemini Vision Pro:** Used for scene analysis, object detection, and mood extraction. The API will be called from the `/api/analyze-chunk` route.
+*   **Google Lyria:** Used for generating background music. The API will be called from the `/api/generate-music` route.
+*   **Meta AudioGen (via Replicate):** Used for generating sound effects. The API will be called from the `/api/generate-sfx-batch` route.
 
 ## 5. Development Roadmap
 
-1.  **Phase 1: Supabase Setup & Frontend Scaffolding**
-    *   Set up Supabase project, tables, and storage.
-    *   Create the Next.js frontend with basic UI components.
-    *   Implement user authentication.
-    *   Implement video upload and the `on-video-upload` function.
-2.  **Phase 2: Gemini Integration**
-    *   Implement the `analyze-video` function.
-    *   Integrate the Gemini Vision Pro API.
-    *   Display the analysis results on the frontend.
-3.  **Phase 3: Audio Generation**
-    *   Implement the `generate-music` and `generate-sfx` functions.
-    *   Integrate the Lyria and AudioGen APIs.
-    *   Store the generated audio files in Supabase Storage.
-4.  **Phase 4: Audio Timeline & Merging**
-    *   Implement the `AudioTimeline` component to display the generated audio layers.
-    *   Use `ffmpeg.wasm` on the client-side to merge the audio layers with the video.
-    *   Allow the user to download the final video.
+1.  **Phase 1: Supabase Setup & Frontend Scaffolding**  
+    *   Set up Supabase project, tables, and storage.  
+    *   Create the Next.js frontend with basic UI components.  
+    *   Implement user authentication.  
+    *   Implement video upload and the `/api/on-video-upload` route.  
+2.  **Phase 2: Gemini Integration**  
+    *   Implement the `/api/analyze-chunk` route.  
+    *   Integrate the Gemini Vision Pro API.  
+    *   Display the analysis results on the frontend.  
+3.  **Phase 3: Audio Generation**  
+    *   Implement the `/api/generate-music` and `/api/generate-sfx-batch` routes.  
+    *   Integrate the Lyria and AudioGen APIs.  
+    *   Store the generated audio files in Supabase Storage.  
+4.  **Phase 4: Audio Timeline & Merging**  
+    *   Implement the `AudioTimeline` component to display the generated audio layers.  
+    *   Use `ffmpeg.wasm` on the client-side to merge the audio layers with the video.  
+    *   Allow the user to download the final video.  

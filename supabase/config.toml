@@ -1,11 +1,13 @@
-[functions]
-  [functions.on-video-upload]
-    timeout = 60
-  [functions.analyze-chunk]
-    timeout = 60
-  [functions.generate-music]
-    timeout = 300
-  [functions.generate-sfx-batch]
-    timeout = 300
-  [functions.finalize-project]
-    timeout = 60
+# [functions] section commented out - Edge Functions migrated to Next.js API routes
+# Timeout configurations moved to next.config.ts
+# [functions]
+#   [functions.on-video-upload]
+#     timeout = 60
+#   [functions.analyze-chunk]
+#     timeout = 60
+#   [functions.generate-music]
+#     timeout = 300
+#   [functions.generate-sfx-batch]
+#     timeout = 300
+#   [functions.finalize-project]
+#     timeout = 60
