@@ -1,32 +1,40 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase-server';
 import { corsHeaders } from '@/lib/cors';
-import { generateMusic } from '@/lib/ai-clients';
-import type { MusicGenerationRequest } from '@/types/api';
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
-    const { projectId, consolidatedAnalysis }: MusicGenerationRequest = await request.json();
+    const { projectId } = await request.json();
     const supabase = createClient();
 
+    // Skip Lyria implementation for now
+    throw new Error('Music generation not implemented');
+    
+    // The following code will be implemented later
+    /*
     const musicUrl = await generateMusic(consolidatedAnalysis);
-
-    await supabase.from('audio_layers').insert({ project_id: projectId, url: musicUrl, type: 'music' });
-
-    await supabase.from('processing_jobs').update({ stage: 'generating_sfx' }).eq('project_id', projectId);
-
-    return NextResponse.json({ success: true }, {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
+    await supabase.from('audio_layers').insert({
+      project_id: projectId,
+      url: musicUrl,
+      type: 'music',
+      status: 'generated'
     });
-  } catch (error) {
-    return NextResponse.json({ error: error.message }, {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 400,
+    await supabase.from('processing_jobs').update({ stage: 'generating_sfx' }).eq('project_id', projectId);
+    */
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return NextResponse.json({ error: message }, {
+      status: 500,
+      headers: corsHeaders
     });
   }
 }
 
 export async function OPTIONS() {
-  return new Response("ok", { headers: corsHeaders });
+  return new Response(null, {
+    headers: {
+      ...corsHeaders,
+      'Allow': 'POST, OPTIONS'
+    }
+  });
 }

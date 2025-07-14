@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useProjectsStore } from '@/stores/projects';
+import { useParams, useRouter } from 'next/navigation';
 import { Project, ProjectStatus } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -122,7 +122,7 @@ export default function ProjectPage() {
     };
 
     loadProject();
-  }, [projectId, projects, fetchProjects, setCurrentProject]);
+  }, [projectId]);
 
   const handleNavigateToPhase = (phase: string) => {
     router.push(`/projects/${projectId}/${phase}`);

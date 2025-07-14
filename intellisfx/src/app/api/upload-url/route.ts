@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSignedUploadUrl, triggerVideoUpload, supabase } from '@/lib/supabase';
+import { getSignedUploadUrl } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase-server';
 import { z } from 'zod';
 
 const uploadUrlRequestSchema = z.object({
@@ -14,22 +15,24 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const validatedData = uploadUrlRequestSchema.parse(body);
-    const { fileName, fileType, fileSize, duration } = validatedData;
+    const { fileName } = validatedData;
     let { projectId } = validatedData;
+    const supabase = createClient();
 
     if (!projectId) {
-        const { data, error } = await supabase.from('projects').insert({ name: fileName, status: 'uploading' }).select().single();
-        if (error) throw error;
+        const { data, error } = await supabase.from('projects').insert({ name: fileName, status: 'uploading' }).select('id').single();
+        if (error) {
+          console.error('Error creating project:', error);
+          return NextResponse.json({ error: error.message }, { status: 500 });
+        }
         projectId = data.id;
     }
 
     const filePath = `videos/${projectId}/${fileName}`;
 
-    const { signedUrl, path } = await getSignedUploadUrl('videos', filePath, { contentType: fileType });
+    const { signedUrl, path } = await getSignedUploadUrl('videos', filePath);
 
-    await triggerVideoUpload({ projectId, videoUrl: path, fileName, fileSize, duration });
-
-    return NextResponse.json({ signedUrl, jobId: null, projectId }, { status: 200 });
+    return NextResponse.json({ signedUrl, path, projectId }, { status: 200 });
 
   } catch (error) {
     console.error('Error in upload-url route:', error);

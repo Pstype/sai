@@ -51,9 +51,19 @@ const sortOptions = [
 ]
 
 export function ProjectGrid({ className, onCreateProject, onProjectSelect }: ProjectGridProps) {
-  const projects = useProjects()
-  const isLoading = useProjectLoading()
-  const error = useProjectError()
+  const {
+    projects,
+    isLoading,
+    error,
+    filters,
+    totalCount,
+    hasMore,
+    fetchProjects,
+    loadMore,
+    setFilters,
+    clearFilters,
+    clearError,
+  } = useProjectsStore();
   
   
 
@@ -70,36 +80,7 @@ export function ProjectGrid({ className, onCreateProject, onProjectSelect }: Pro
     fetchProjects()
   }, [fetchProjects])
 
-  // Apply filters when they change
-  useEffect(() => {
-    const newFilters: ProjectFilters = {
-      search: searchQuery || undefined,
-      status: selectedStatuses.length > 0 ? selectedStatuses : undefined,
-      sortBy: sortBy.field,
-      sortOrder: sortBy.direction,
-      limit: 20,
-      offset: 0
-    }
-    
-    setFilters(newFilters)
-    fetchProjects(newFilters)
-  }, [searchQuery, selectedStatuses, sortBy])
-
-  // Filtered and sorted projects
-  const filteredProjects = useMemo(() => {
-    let result = [...projects]
-    
-    // Client-side search (backup for server-side search)
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase()
-      result = result.filter(project => 
-        project.title.toLowerCase().includes(query) ||
-        project.description?.toLowerCase().includes(query)
-      )
-    }
-    
-    return result
-  }, [projects, searchQuery])
+  
 
   // Grid layout classes based on size
   const gridClasses = {
@@ -108,26 +89,24 @@ export function ProjectGrid({ className, onCreateProject, onProjectSelect }: Pro
     large: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3'
   }
 
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFilters({ search: e.target.value });
+  };
+
   const handleStatusToggle = (status: ProjectStatus) => {
-    setSelectedStatuses(prev => 
-      prev.includes(status) 
-        ? prev.filter(s => s !== status)
-        : [...prev, status]
-    )
-  }
+    const newStatuses = filters.status?.includes(status)
+      ? filters.status.filter((s) => s !== status)
+      : [...(filters.status || []), status];
+    setFilters({ status: newStatuses });
+  };
 
   const handleSortChange = (field: keyof Project) => {
-    setSortBy(prev => ({
-      field,
-      direction: prev.field === field && prev.direction === 'asc' ? 'desc' : 'asc'
-    }))
-  }
+    const newSortOrder = filters.sortBy === field && filters.sortOrder === 'asc' ? 'desc' : 'asc';
+    setFilters({ sortBy: field, sortOrder: newSortOrder });
+  };
 
   const handleClearFilters = () => {
-    setSearchQuery('')
-    setSelectedStatuses([])
-    setSortBy({ field: 'updatedAt', direction: 'desc' })
-    clearFilters()
+    clearFilters();
   }
 
   const handleRefresh = () => {
@@ -163,24 +142,24 @@ export function ProjectGrid({ className, onCreateProject, onProjectSelect }: Pro
   // Empty state
   const EmptyState = () => (
     <div className="flex flex-col items-center justify-center py-16 text-center">
-      <div className="rounded-full bg-surface p-6 mb-6">
-        <Music className="h-12 w-12 text-text-secondary" />
+      <div className="rounded-full bg-gray-100 p-6 mb-6">
+        <Music className="h-12 w-12 text-gray-500" />
       </div>
-      <h3 className="text-xl font-semibold text-text-primary mb-2">
-        {searchQuery || selectedStatuses.length > 0 ? 'No projects found' : 'No projects yet'}
+      <h3 className="text-xl font-semibold text-gray-800 mb-2">
+        {filters.search || filters.status?.length > 0 ? 'No projects found' : 'No projects yet'}
       </h3>
-      <p className="text-text-secondary mb-6 max-w-md">
-        {searchQuery || selectedStatuses.length > 0 
+      <p className="text-gray-500 mb-6 max-w-md">
+        {filters.search || filters.status?.length > 0 
           ? 'Try adjusting your search or filters to find what you\'re looking for.'
           : 'Create your first project to get started with AI-powered audio generation.'
         }
       </p>
-      {searchQuery || selectedStatuses.length > 0 ? (
+      {filters.search || filters.status?.length > 0 ? (
         <Button variant="secondary" onClick={handleClearFilters}>
           Clear Filters
         </Button>
       ) : (
-        <Button variant="primary" onClick={onCreateProject}>
+        <Button variant="default" onClick={onCreateProject}>
           <Plus className="h-4 w-4 mr-2" />
           Create Project
         </Button>
@@ -213,11 +192,11 @@ export function ProjectGrid({ className, onCreateProject, onProjectSelect }: Pro
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="flex-1 max-w-md">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-secondary" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <Input
               placeholder="Search projects..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              value={filters.search || ''}
+              onChange={handleSearchChange}
               className="pl-10"
             />
           </div>
@@ -226,23 +205,23 @@ export function ProjectGrid({ className, onCreateProject, onProjectSelect }: Pro
         <div className="flex items-center gap-2">
           {/* Filter Toggle */}
           <Button
-            variant={showFilters ? "primary" : "ghost"}
+            variant={showFilters ? "default" : "ghost"}
             size="sm"
             onClick={() => setShowFilters(!showFilters)}
           >
             <Filter className="h-4 w-4 mr-2" />
             Filters
-            {(selectedStatuses.length > 0) && (
-              <span className="ml-2 rounded-full bg-primary-light text-primary-dark px-2 py-0.5 text-xs">
-                {selectedStatuses.length}
+            {(filters.status?.length > 0) && (
+              <span className="ml-2 rounded-full bg-blue-100 text-blue-800 px-2 py-0.5 text-xs">
+                {filters.status.length}
               </span>
             )}
           </Button>
 
           {/* View Mode Toggle */}
-          <div className="flex rounded-lg border border-border overflow-hidden">
+          <div className="flex rounded-lg border border-gray-200 overflow-hidden">
             <Button
-              variant={viewMode === 'grid' ? 'primary' : 'ghost'}
+              variant={viewMode === 'grid' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setViewMode('grid')}
               className="rounded-none border-0"
@@ -250,7 +229,7 @@ export function ProjectGrid({ className, onCreateProject, onProjectSelect }: Pro
               <Grid3X3 className="h-4 w-4" />
             </Button>
             <Button
-              variant={viewMode === 'list' ? 'primary' : 'ghost'}
+              variant={viewMode === 'list' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setViewMode('list')}
               className="rounded-none border-0"
@@ -278,12 +257,12 @@ export function ProjectGrid({ className, onCreateProject, onProjectSelect }: Pro
             <div className="space-y-4">
               {/* Status Filters */}
               <div>
-                <h4 className="text-sm font-medium text-text-primary mb-3">Status</h4>
+                <h4 className="text-sm font-medium text-gray-800 mb-3">Status</h4>
                 <div className="flex flex-wrap gap-2">
                   {statusOptions.map((status) => (
                     <Button
                       key={status.value}
-                      variant={selectedStatuses.includes(status.value) ? "primary" : "ghost"}
+                      variant={filters.status?.includes(status.value) ? "default" : "ghost"}
                       size="sm"
                       onClick={() => handleStatusToggle(status.value)}
                       className="text-xs"
@@ -297,15 +276,15 @@ export function ProjectGrid({ className, onCreateProject, onProjectSelect }: Pro
 
               {/* Sort Options */}
               <div>
-                <h4 className="text-sm font-medium text-text-primary mb-3">Sort by</h4>
+                <h4 className="text-sm font-medium text-gray-800 mb-3">Sort by</h4>
                 <div className="flex flex-wrap gap-2">
                   {sortOptions.map((option) => {
                     const Icon = option.icon
-                    const isActive = sortBy.field === option.field
+                    const isActive = filters.sortBy === option.field
                     return (
                       <Button
                         key={option.field}
-                        variant={isActive ? "primary" : "ghost"}
+                        variant={isActive ? "default" : "ghost"}
                         size="sm"
                         onClick={() => handleSortChange(option.field)}
                         className="text-xs"
@@ -313,7 +292,7 @@ export function ProjectGrid({ className, onCreateProject, onProjectSelect }: Pro
                         <Icon className="h-3 w-3 mr-2" />
                         {option.label}
                         {isActive && (
-                          sortBy.direction === 'asc' ? 
+                          filters.sortOrder === 'asc' ? 
                             <SortAsc className="h-3 w-3 ml-2" /> : 
                             <SortDesc className="h-3 w-3 ml-2" />
                         )}
@@ -324,8 +303,8 @@ export function ProjectGrid({ className, onCreateProject, onProjectSelect }: Pro
               </div>
 
               {/* Clear Filters */}
-              {(selectedStatuses.length > 0 || searchQuery) && (
-                <div className="pt-2 border-t border-border">
+              {(filters.status?.length > 0 || filters.search) && (
+                <div className="pt-2 border-t border-gray-200">
                   <Button variant="ghost" size="sm" onClick={handleClearFilters}>
                     Clear all filters
                   </Button>

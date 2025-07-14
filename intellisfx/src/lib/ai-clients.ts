@@ -1,6 +1,12 @@
 // Add AI client implementations here
 
-export async function analyzeVideoChunk(chunkUrl: string): Promise<any> {
+interface VideoChunkAnalysis {
+  scenes: any[];
+  objects: any[];
+  emotions: any[];
+}
+
+export async function analyzeVideoChunk(chunkUrl: string): Promise<VideoChunkAnalysis> {
   // Mock implementation
   console.log(`Analyzing chunk: ${chunkUrl}`);
   return Promise.resolve({ scenes: [], objects: [], emotions: [] });

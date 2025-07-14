@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { VideoUploader } from '@/components/upload/video-uploader'
 import { ProcessingCard } from '@/components/processing/processing-card'
 import { useProjectsStore } from '@/stores/projects'
-import { useProcessingStore, useIsProcessing, useCurrentJob } from '@/stores/processing'
+import { useProcessingStore, useIsProcessing } from '@/stores/processing'
 import { ProjectStatus } from '@/types'
 import { ArrowRight, ArrowLeft, Eye, Brain, Waveform, CheckCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -155,7 +155,7 @@ export default function UploadPage() {
   const projectId = params.id as string
 
   const { currentProject, setCurrentProject, updateProject } = useProjectsStore()
-  const { jobs, getJobsByProject } = useProcessingStore()
+  const { getJobsByProject } = useProcessingStore()
   const isProcessing = useIsProcessing()
   
 

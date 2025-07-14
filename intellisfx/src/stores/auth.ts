@@ -9,10 +9,10 @@ interface AuthState {
 }
 
 interface AuthActions {
-  login: (email: string, passowrd: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
-  signUp: (email: string, passowrd: string) => Promise<void>;
+  signUp: (email: string, password: string) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState & AuthActions>((set) => ({

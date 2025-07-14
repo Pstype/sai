@@ -54,13 +54,13 @@ export default function EditPage() {
   // Playback state
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(120); // 2 minutes mock duration
-  const [volume, setVolume] = useState(80);
+  const [duration] = useState(120); // 2 minutes mock duration
+  const [volume] = useState(80);
 
   // Timeline state
   const [zoomLevel, setZoomLevel] = useState(1);
   const [selectedTrack, setSelectedTrack] = useState<string | null>(null);
-  const [timelinePosition, setTimelinePosition] = useState(0);
+  
 
   // AI Chat state
   const [chatMessages, setChatMessages] = useState([
@@ -114,7 +114,7 @@ export default function EditPage() {
   ]);
 
   // Mock timeline markers
-  const [markers, setMarkers] = useState<TimelineMarker[]>([
+  const [markers] = useState<TimelineMarker[]>([
     { id: "1", time: 15, label: "Intro", type: "chapter" },
     { id: "2", time: 45, label: "Main Content", type: "chapter" },
     { id: "3", time: 90, label: "Outro", type: "chapter" },

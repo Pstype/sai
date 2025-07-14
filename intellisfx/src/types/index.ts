@@ -436,6 +436,10 @@ export interface ProjectFilters {
   }
   audioTypes?: AudioType[]
   search?: string
+  sortBy?: keyof Project
+  sortOrder?: 'asc' | 'desc'
+  limit?: number
+  offset?: number
 }
 
 export interface SortOptions {

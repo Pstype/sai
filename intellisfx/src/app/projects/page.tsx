@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { ProjectGrid } from '@/components/dashboard/project-grid'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 import { 
   ArrowLeft,

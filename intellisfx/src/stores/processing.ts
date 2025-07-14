@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { ProcessingJob } from '@/types';
-import { subscribeToProject, unsubscribeFromProject, fetchProcessingJobs } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { RealtimeChannel } from '@supabase/supabase-js';
 
 interface ProcessingState {
@@ -14,12 +14,10 @@ interface ProcessingState {
 
 interface ProcessingActions {
   syncJobsFromDatabase: (projectId: string) => Promise<void>;
-  handleRealtimeUpdate: (payload: any) => void;
+  handleRealtimeUpdate: (payload: { new: ProcessingJob }) => void;
   subscribeToProject: (projectId: string) => void;
   unsubscribeFromProject: () => void;
-  startVideoProcessing: (projectId: string, videoUrl: string) => Promise<void>;
-  retryFailedJob: (jobId: string) => Promise<void>;
-  cancelProcessing: (projectId: string) => Promise<void>;
+  getJobsByProject: (projectId: string) => ProcessingJob[];
 }
 
 export const useProcessingStore = create<ProcessingState & ProcessingActions>((set, get) => ({
@@ -30,18 +28,22 @@ export const useProcessingStore = create<ProcessingState & ProcessingActions>((s
   lastSyncTime: null,
   channel: null,
 
-  syncJobsFromDatabase: async (projectId) => {
+  syncJobsFromDatabase: async (projectId: string) => {
     try {
-      const jobs = await fetchProcessingJobs(projectId);
-      set({ jobs, lastSyncTime: new Date() });
+      const { data, error } = await supabase
+        .from('processing_jobs')
+        .select('*')
+        .eq('project_id', projectId);
+      if (error) throw error;
+      set({ jobs: data || [], lastSyncTime: new Date() });
     } catch (error) {
       console.error("Error syncing jobs:", error);
     }
   },
 
-  handleRealtimeUpdate: (payload) => {
+  handleRealtimeUpdate: (payload: { new: ProcessingJob }) => {
     const { new: newJob } = payload;
-    set((state) => {
+    set((state: ProcessingState) => {
       const jobs = [...state.jobs];
       const jobIndex = jobs.findIndex(j => j.id === newJob.id);
       if (jobIndex !== -1) {
@@ -49,23 +51,64 @@ export const useProcessingStore = create<ProcessingState & ProcessingActions>((s
       } else {
         jobs.push(newJob);
       }
-      return { jobs };
+      // Recalculate total progress
+      const totalProgress = jobs.length > 0
+        ? jobs.reduce((acc, job) => acc + job.progress, 0) / jobs.length
+        : 0;
+      return { jobs, totalProgress };
     });
   },
 
-  subscribeToProject: (projectId) => {
-    const channel = subscribeToProject(projectId, get().handleRealtimeUpdate);
-    set({ channel, connectionStatus: 'connected' });
+  subscribeToProject: (projectId: string) => {
+    const currentChannel = get().channel;
+    if (currentChannel && currentChannel.topic === `realtime:public:processing_jobs:project_id=eq.${projectId}`) {
+      // Already subscribed to the correct channel
+      return;
+    }
+
+    // If there's an existing channel, unsubscribe from it before creating a new one.
+    get().unsubscribeFromProject();
+
+    const newChannel = supabase.channel(`project-${projectId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'processing_jobs',
+          filter: `project_id=eq.${projectId}`
+        },
+        (payload) => {
+          if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+            get().handleRealtimeUpdate({ new: payload.new as ProcessingJob });
+          }
+        }
+      )
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          set({ connectionStatus: 'connected' });
+          // Sync initial state once subscribed
+          get().syncJobsFromDatabase(projectId);
+        } else if (status === 'CHANNEL_ERROR') {
+          set({ connectionStatus: 'disconnected' });
+        } else {
+          set({ connectionStatus: 'reconnecting' });
+        }
+      });
+
+    set({ channel: newChannel });
   },
 
   unsubscribeFromProject: () => {
-    unsubscribeFromProject();
+    get().channel?.unsubscribe();
     set({ channel: null, connectionStatus: 'disconnected' });
   },
 
-  
-
-  
-
-  
+  getJobsByProject: (projectId) => {
+    return get().jobs.filter(job => job.projectId === projectId);
+  },
 }));
+
+export const useIsProcessing = () => useProcessingStore(state =>
+  state.jobs.some(job => job.status === 'processing' || job.status === 'pending')
+);

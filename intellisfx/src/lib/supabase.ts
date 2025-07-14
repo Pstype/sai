@@ -1,10 +1,11 @@
 import { createClient, RealtimeChannel } from '@supabase/supabase-js';
-import { Database } from '@/types/supabase'; // Assuming you have generated types
+import { Database } from '@/types/supabase';
+import { env } from '@/config/env';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient<Database>(
+  env.NEXT_PUBLIC_SUPABASE_URL,
+  env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
 
 export const STORAGE_BUCKETS = {
     videos: {
@@ -24,25 +25,36 @@ export const STORAGE_BUCKETS = {
     },
 };
 
-// --- Existing getSignedUploadUrl function ---
+/**
+ * Get a signed URL for uploading a file to Supabase Storage
+ * @param bucket - The bucket name (must be one of STORAGE_BUCKETS keys)
+ * @param filePath - The path to store the file in the bucket
+ * @param options - Upload options
+ * @param options.expiresIn - URL expiration time in seconds (default: 3600)
+ * @param options.upsert - Whether to overwrite existing file (default: false)
+ */
 export async function getSignedUploadUrl(
     bucket: string,
     filePath: string,
-    options: { expiresIn?: number; upsert?: boolean; contentType?: string } = {}
+    options: { expiresIn?: number; upsert?: boolean; } = {}
 ) {
     const bucketConfig = STORAGE_BUCKETS[bucket as keyof typeof STORAGE_BUCKETS];
     if (!bucketConfig) {
         throw new Error('Invalid bucket specified');
     }
 
-    const { expiresIn = 3600, upsert = false, contentType } = options;
+    const { expiresIn = 3600, upsert = false } = options;
 
     try {
+        // Use inline type definition to satisfy TypeScript
         const { data, error } = await supabase.storage
             .from(bucketConfig.name)
-            .createSignedUploadUrl(filePath, expiresIn, {
-                upsert,
-                contentType,
+            .createSignedUploadUrl(filePath, {
+                expiresIn: expiresIn,
+                upsert: upsert,
+            } as {
+                expiresIn: number;
+                upsert: boolean;
             });
 
         if (error) {
@@ -56,7 +68,6 @@ export async function getSignedUploadUrl(
 
         return {
             signedUrl: data.signedUrl,
-            token: data.token,
             path: data.path
         };
     } catch (error) {
