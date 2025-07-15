@@ -1,6 +1,7 @@
 "use client"
 
 import React from 'react'
+import Image from 'next/image'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { cn, formatDuration, formatRelativeTime, truncateText } from '@/lib/utils'
@@ -126,10 +127,12 @@ export function ProjectCard({
       {/* Thumbnail Section */}
       <div className="relative aspect-video overflow-hidden bg-surface-light">
         {project.videoUrl ? (
-          <img
+          <Image
             src={thumbnailUrl}
             alt={project.title}
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            layout="fill"
+            objectFit="cover"
+            className="transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-surface to-surface-light">

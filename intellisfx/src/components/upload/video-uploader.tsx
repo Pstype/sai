@@ -138,7 +138,7 @@ export function VideoUploader({
     } finally {
       setIsUploading(false);
     }
-  }, [currentProjectId, onUploadComplete]);
+  }, [currentProjectId, onUploadComplete, subscribeToProject]);
 
   const uploadFile = async (file: File, signedUrl: string) => {
     return new Promise<void>((resolve, reject) => {

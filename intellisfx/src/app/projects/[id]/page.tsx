@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useParams, useRouter } from 'next/navigation';
 import { Project, ProjectStatus } from '@/types';
 import { Button } from '@/components/ui/button';
+import { useProjectsStore } from '@/stores/projects'; // Import projects store
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { 
@@ -17,7 +17,7 @@ import {
   Calendar, 
   Clock, 
   FileVideo, 
-  Waveform,
+  Waves, // Replaced Waveform with Waves
   CheckCircle,
   AlertCircle,
   Loader2
@@ -96,6 +96,15 @@ export default function ProjectPage() {
   
   
 
+  // Connect to projects store
+  const {
+    projects,
+    fetchProjects,
+    setCurrentProject,
+    isLoading,
+    error
+  } = useProjectsStore();
+
   const [project, setProject] = useState<Project | null>(null);
   const [notFound, setNotFound] = useState(false);
 
@@ -106,8 +115,8 @@ export default function ProjectPage() {
         await fetchProjects();
       }
 
-      // Find the project by ID
-      const foundProject = projects.find(p => p.id === projectId);
+      // Find the project by ID with proper typing
+      const foundProject = projects.find((p: Project) => p.id === projectId);
       
       if (foundProject) {
         setProject(foundProject);
@@ -122,7 +131,7 @@ export default function ProjectPage() {
     };
 
     loadProject();
-  }, [projectId]);
+  }, [projectId, projects, fetchProjects, setCurrentProject]);
 
   const handleNavigateToPhase = (phase: string) => {
     router.push(`/projects/${projectId}/${phase}`);
@@ -277,9 +286,9 @@ export default function ProjectPage() {
               )}
 
               {/* Audio Assets */}
-              {project.audioAssets.length > 0 && (
+              {project.audioAssets && project.audioAssets.length > 0 && (
                 <div className="flex items-center space-x-2">
-                  <Waveform className="h-4 w-4 text-muted-foreground" />
+                  <Waves className="h-4 w-4 text-muted-foreground" />
                   <div>
                     <p className="text-sm font-medium">Audio Assets</p>
                     <p className="text-sm text-muted-foreground">
@@ -378,7 +387,7 @@ export default function ProjectPage() {
                     ? 'border-gray-200 bg-gray-50 opacity-50 cursor-not-allowed'
                     : project.status === ProjectStatus.GENERATING
                     ? 'border-blue-500 bg-blue-50 cursor-pointer'
-                    : project.audioAssets.length > 0
+                    : project.audioAssets && project.audioAssets.length > 0
                     ? 'border-green-500 bg-green-50 cursor-pointer'
                     : 'border-gray-300 bg-white cursor-pointer'
                 }`}
@@ -386,7 +395,7 @@ export default function ProjectPage() {
               >
                 <div className="flex items-center justify-between mb-2">
                   <Music className="h-5 w-5" />
-                  {project.audioAssets.length > 0 && <CheckCircle className="h-4 w-4 text-green-600" />}
+                  {project.audioAssets && project.audioAssets.length > 0 && <CheckCircle className="h-4 w-4 text-green-600" />}
                 </div>
                 <h3 className="font-medium">Generate Audio</h3>
                 <p className="text-sm text-muted-foreground">

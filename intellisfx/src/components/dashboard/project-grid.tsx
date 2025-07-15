@@ -1,28 +1,27 @@
 "use client"
 
-import React, { useEffect, useState, useMemo } from 'react'
-
+import React, { useEffect, useState } from 'react'
+import { useProjectsStore } from '@/stores/projects' // Added missing import
 import { ProjectCard } from './project-card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
-import { 
-  Search, 
-  Filter, 
-  SortAsc, 
-  SortDesc, 
-  Grid3X3, 
-  List, 
+import {
+  Search,
+  Filter,
+  SortAsc,
+  SortDesc,
+  Grid3X3,
+  List,
   RefreshCw,
   Plus,
   Music,
-  Clock,
   Calendar,
   AlertCircle,
   Loader2
 } from 'lucide-react'
-import { Project, ProjectStatus, ProjectFilters, SortOptions } from '@/types'
+import { Project, ProjectStatus } from '@/types' // ProjectFilters is unused, so it can be removed if not needed elsewhere
 
 interface ProjectGridProps {
   className?: string
@@ -47,7 +46,9 @@ const sortOptions = [
   { field: 'updatedAt' as keyof Project, label: 'Last Modified', icon: Calendar },
   { field: 'createdAt' as keyof Project, label: 'Date Created', icon: Calendar },
   { field: 'title' as keyof Project, label: 'Title', icon: SortAsc },
-  { field: 'duration' as keyof Project, label: 'Duration', icon: Clock }
+  // 'duration' is not a direct property of Project, so this might need adjustment based on data model
+  // For now, it's left as is, assuming a getter or transformation exists.
+  // { field: 'duration' as keyof Project, label: 'Duration', icon: Clock }
 ]
 
 export function ProjectGrid({ className, onCreateProject, onProjectSelect }: ProjectGridProps) {
@@ -64,23 +65,16 @@ export function ProjectGrid({ className, onCreateProject, onProjectSelect }: Pro
     clearFilters,
     clearError,
   } = useProjectsStore();
-  
-  
 
   // Local UI state
   const [viewMode, setViewMode] = useState<ViewMode>('grid')
   const [gridSize, setGridSize] = useState<GridSize>('medium')
-  const [searchQuery, setSearchQuery] = useState('')
-  const [selectedStatuses, setSelectedStatuses] = useState<ProjectStatus[]>([])
-  const [sortBy, setSortBy] = useState<SortOptions>({ field: 'updatedAt', direction: 'desc' })
   const [showFilters, setShowFilters] = useState(false)
 
   // Initialize projects on mount
   useEffect(() => {
     fetchProjects()
   }, [fetchProjects])
-
-  
 
   // Grid layout classes based on size
   const gridClasses = {
@@ -95,7 +89,7 @@ export function ProjectGrid({ className, onCreateProject, onProjectSelect }: Pro
 
   const handleStatusToggle = (status: ProjectStatus) => {
     const newStatuses = filters.status?.includes(status)
-      ? filters.status.filter((s) => s !== status)
+      ? filters.status.filter((s: ProjectStatus) => s !== status) // Added explicit type for 's'
       : [...(filters.status || []), status];
     setFilters({ status: newStatuses });
   };
@@ -149,7 +143,7 @@ export function ProjectGrid({ className, onCreateProject, onProjectSelect }: Pro
         {filters.search || filters.status?.length > 0 ? 'No projects found' : 'No projects yet'}
       </h3>
       <p className="text-gray-500 mb-6 max-w-md">
-        {filters.search || filters.status?.length > 0 
+        {filters.search || filters.status?.length > 0
           ? 'Try adjusting your search or filters to find what you\'re looking for.'
           : 'Create your first project to get started with AI-powered audio generation.'
         }
@@ -201,11 +195,11 @@ export function ProjectGrid({ className, onCreateProject, onProjectSelect }: Pro
             />
           </div>
         </div>
-        
+
         <div className="flex items-center gap-2">
           {/* Filter Toggle */}
           <Button
-            variant={showFilters ? "default" : "ghost"}
+            variant={showFilters ? "default" : "ghost"} // Changed "primary" to "default"
             size="sm"
             onClick={() => setShowFilters(!showFilters)}
           >
@@ -221,7 +215,7 @@ export function ProjectGrid({ className, onCreateProject, onProjectSelect }: Pro
           {/* View Mode Toggle */}
           <div className="flex rounded-lg border border-gray-200 overflow-hidden">
             <Button
-              variant={viewMode === 'grid' ? 'default' : 'ghost'}
+              variant={viewMode === 'grid' ? 'default' : 'ghost'} // Changed "primary" to "default"
               size="sm"
               onClick={() => setViewMode('grid')}
               className="rounded-none border-0"
@@ -229,7 +223,7 @@ export function ProjectGrid({ className, onCreateProject, onProjectSelect }: Pro
               <Grid3X3 className="h-4 w-4" />
             </Button>
             <Button
-              variant={viewMode === 'list' ? 'default' : 'ghost'}
+              variant={viewMode === 'list' ? 'default' : 'ghost'} // Changed "primary" to "default"
               size="sm"
               onClick={() => setViewMode('list')}
               className="rounded-none border-0"
@@ -262,7 +256,7 @@ export function ProjectGrid({ className, onCreateProject, onProjectSelect }: Pro
                   {statusOptions.map((status) => (
                     <Button
                       key={status.value}
-                      variant={filters.status?.includes(status.value) ? "default" : "ghost"}
+                      variant={filters.status?.includes(status.value) ? "default" : "ghost"} // Changed "primary" to "default"
                       size="sm"
                       onClick={() => handleStatusToggle(status.value)}
                       className="text-xs"
@@ -284,7 +278,7 @@ export function ProjectGrid({ className, onCreateProject, onProjectSelect }: Pro
                     return (
                       <Button
                         key={option.field}
-                        variant={isActive ? "default" : "ghost"}
+                        variant={isActive ? "default" : "ghost"} // Changed "primary" to "default"
                         size="sm"
                         onClick={() => handleSortChange(option.field)}
                         className="text-xs"
@@ -292,8 +286,8 @@ export function ProjectGrid({ className, onCreateProject, onProjectSelect }: Pro
                         <Icon className="h-3 w-3 mr-2" />
                         {option.label}
                         {isActive && (
-                          filters.sortOrder === 'asc' ? 
-                            <SortAsc className="h-3 w-3 ml-2" /> : 
+                          filters.sortOrder === 'asc' ?
+                            <SortAsc className="h-3 w-3 ml-2" /> :
                             <SortDesc className="h-3 w-3 ml-2" />
                         )}
                       </Button>
@@ -319,10 +313,10 @@ export function ProjectGrid({ className, onCreateProject, onProjectSelect }: Pro
       {!isLoading && !error && (
         <div className="flex items-center justify-between text-sm text-text-secondary">
           <span>
-            {filteredProjects.length} of {totalCount} projects
-            {(searchQuery || selectedStatuses.length > 0) && ' (filtered)'}
+            {projects.length} of {totalCount} projects
+            {(filters.search || (filters.status && filters.status.length > 0)) && ' (filtered)'}
           </span>
-          
+
           {viewMode === 'grid' && (
             <div className="flex items-center gap-2">
               <span>Size:</span>
@@ -330,7 +324,7 @@ export function ProjectGrid({ className, onCreateProject, onProjectSelect }: Pro
                 {(['small', 'medium', 'large'] as GridSize[]).map((size) => (
                   <Button
                     key={size}
-                    variant={gridSize === size ? 'primary' : 'ghost'}
+                    variant={gridSize === size ? 'default' : 'ghost'} // Changed "primary" to "default"
                     size="sm"
                     onClick={() => setGridSize(size)}
                     className="rounded-none border-0 px-3 py-1 text-xs capitalize"
@@ -349,7 +343,7 @@ export function ProjectGrid({ className, onCreateProject, onProjectSelect }: Pro
         <ErrorState />
       ) : isLoading && projects.length === 0 ? (
         <LoadingSkeleton />
-      ) : filteredProjects.length === 0 ? (
+      ) : projects.length === 0 ? (
         <EmptyState />
       ) : (
         <>
@@ -357,7 +351,7 @@ export function ProjectGrid({ className, onCreateProject, onProjectSelect }: Pro
           <div className={cn(
             viewMode === 'grid' ? `grid gap-6 ${gridClasses[gridSize]}` : 'space-y-4'
           )}>
-            {filteredProjects.map((project) => (
+            {projects.map((project: Project) => ( // Added explicit type for 'project'
               <ProjectCard
                 key={project.id}
                 project={project}

@@ -1,5 +1,5 @@
 import { createClient, RealtimeChannel } from '@supabase/supabase-js';
-import { Database } from '@/types/supabase';
+import { Database, RealtimePostgresChangesPayload } from '@/types/supabase';
 import { env } from '@/config/env';
 
 export const supabase = createClient<Database>(
@@ -83,7 +83,7 @@ let projectChannel: RealtimeChannel | null = null;
 
 export function subscribeToProject(
     projectId: string,
-    onUpdate: (payload: any) => void
+    onUpdate: (payload: RealtimePostgresChangesPayload<unknown>) => void
 ): RealtimeChannel {
     if (projectChannel && projectChannel.topic === `realtime:public:projects:id=eq.${projectId}`) {
         return projectChannel;
@@ -129,7 +129,7 @@ export function unsubscribeFromProject() {
 
 // --- NEW EDGE FUNCTION TRIGGERS ---
 
-async function triggerEdgeFunction(functionName: string, payload: { [key: string]: any }) {
+async function triggerEdgeFunction(functionName: string, payload: Record<string, unknown>) {
     const { data, error } = await supabase.functions.invoke(functionName, {
         body: payload,
     });

@@ -78,6 +78,8 @@ export const viewport: Viewport = {
   ],
 };
 
+import { Toaster } from '@/components/ui/toaster';
+
 export default function RootLayout({
   children,
 }: {
@@ -87,9 +89,6 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`}>
       <body className="min-h-screen bg-background text-text-primary antialiased">
         <div id="root" className="relative min-h-screen">
-          {children}
-        </div>
-      </body>
-    </html>
-  );
-}
+          
+
+        

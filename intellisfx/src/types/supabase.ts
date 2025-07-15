@@ -95,3 +95,13 @@ export type Database = {
     };
   };
 };
+
+export type RealtimePostgresChangesPayload<T> = {
+  commit_timestamp: string;
+  errors: unknown[];
+  new: T;
+  old: T;
+  schema: string;
+  table: string;
+  type: 'INSERT' | 'UPDATE' | 'DELETE';
+};

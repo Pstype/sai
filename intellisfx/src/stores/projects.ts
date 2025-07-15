@@ -76,8 +76,9 @@ export const useProjectsStore = create<ProjectsState & ProjectsActions>((set, ge
         hasMore: (count || 0) > (filters.offset || 0) + (data?.length || 0),
         isLoading: false,
       }));
-    } catch (error: any) {
-      set({ error: error.message, isLoading: false });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      set({ error: message, isLoading: false });
     }
   },
 
@@ -111,8 +112,9 @@ export const useProjectsStore = create<ProjectsState & ProjectsActions>((set, ge
       if (data) {
         set((state) => ({ projects: [...state.projects, data[0]], isLoading: false }));
       }
-    } catch (error: any) {
-      set({ error: error.message, isLoading: false });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      set({ error: message, isLoading: false });
     }
   },
 
@@ -127,8 +129,9 @@ export const useProjectsStore = create<ProjectsState & ProjectsActions>((set, ge
           isLoading: false,
         }));
       }
-    } catch (error: any) {
-      set({ error: error.message, isLoading: false });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      set({ error: message, isLoading: false });
     }
   },
 
@@ -138,8 +141,9 @@ export const useProjectsStore = create<ProjectsState & ProjectsActions>((set, ge
       const { error } = await supabase.from('projects').delete().eq('id', id);
       if (error) throw error;
       set((state) => ({ projects: state.projects.filter((p) => p.id !== id), isLoading: false }));
-    } catch (error: any) {
-      set({ error: error.message, isLoading: false });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      set({ error: message, isLoading: false });
     }
   },
 

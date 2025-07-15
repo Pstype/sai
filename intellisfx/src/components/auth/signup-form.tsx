@@ -14,7 +14,6 @@ export function SignUpForm() {
   };
 
   return (
-  return (
     <form onSubmit={handleSubmit} aria-label="Sign up form">
       <Input
         type="email"
@@ -42,6 +41,5 @@ export function SignUpForm() {
         </p>
       )}
     </form>
-  );
   );
 }

@@ -1,3 +1,5 @@
+import { VideoChunkAnalysis } from "@/lib/ai-clients";
+
 export type VideoUploadRequest = {
   projectId: string;
   videoUrl: string;
@@ -15,7 +17,7 @@ export type ChunkAnalysisRequest = {
 
 export type MusicGenerationRequest = {
   projectId: string;
-  consolidatedAnalysis: any;
+  consolidatedAnalysis: VideoChunkAnalysis;
 };
 
 export type SFXGenerationRequest = {

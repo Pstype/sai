@@ -42,6 +42,10 @@ export const useAuthStore = create<AuthState & AuthActions>((set) => ({
       set({ user: null, isLoading: false });
     }
   },
+  import { useUIStore } from './ui';
+
+// ... (rest of the file)
+
   signUp: async (email, password) => {
     set({ isLoading: true, error: null });
     const { data, error } = await supabase.auth.signUp({
@@ -55,6 +59,7 @@ export const useAuthStore = create<AuthState & AuthActions>((set) => ({
       set({ error: error.message, isLoading: false });
     } else if (data.user) {
       set({ user: data.user as User, isLoading: false });
+      useUIStore.getState().setToast({ message: 'Check your email for a confirmation link.', type: 'success' });
     }
   },
 }));

@@ -90,7 +90,11 @@ export function QuickUpload({ onProjectCreated, className }: QuickUploadProps) {
   })
 
   // Handle upload completion
-  
+  const handleUploadComplete = useCallback((projectId: string) => {
+    onProjectCreated?.(projectId);
+    setShowUploader(false);
+    setCurrentProjectId(null);
+  }, [onProjectCreated]);
 
   // Handle cancel
   const handleCancel = useCallback(() => {
@@ -99,6 +103,9 @@ export function QuickUpload({ onProjectCreated, className }: QuickUploadProps) {
   }, [])
 
   // Handle proceed
+  const handleProceed = useCallback((projectId: string) => {
+    onProjectCreated?.(projectId);
+  }, [onProjectCreated]);
   
 
   // If uploader is shown, render the VideoUploader component

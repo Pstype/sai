@@ -87,7 +87,7 @@ export interface AudioAsset {
   duration: number
   waveformData: number[]
   aiModel: AIModel
-  generationParams: Record<string, any>
+  generationParams: LyriaGenerationParams | AudioGenGenerationParams
   projectId: string
   createdAt: Date
 }
@@ -134,7 +134,7 @@ export interface ProcessingJob {
   createdAt: Date
   completedAt?: Date
   error?: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 // Enums
@@ -230,7 +230,7 @@ export interface AudioGenGenerationParams {
 
 // API Response Types
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean
   data?: T
   error?: string
@@ -356,7 +356,7 @@ export interface UIState {
 
 export interface ModalState {
   isOpen: boolean
-  data?: any
+  data?: unknown
 }
 
 // Audio Playback Types
@@ -416,7 +416,7 @@ export type TrackWithElements = TimelineTrack & {
 export interface AppError {
   code: string
   message: string
-  details?: Record<string, any>
+  details?: Record<string, unknown>
   timestamp: Date
 }
 
@@ -470,7 +470,7 @@ export interface ModelPerformance {
 
 export interface WebhookPayload {
   event: string
-  data: any
+  data: unknown
   timestamp: Date
   signature: string
 }

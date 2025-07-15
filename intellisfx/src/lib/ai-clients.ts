@@ -1,9 +1,24 @@
 // Add AI client implementations here
 
 interface VideoChunkAnalysis {
-  scenes: any[];
-  objects: any[];
-  emotions: any[];
+  scenes: Scene[];
+  objects: Object[];
+  emotions: Emotion[];
+}
+
+interface Scene {
+  description: string;
+  timestamp: number;
+}
+
+interface Object {
+  name: string;
+  confidence: number;
+}
+
+interface Emotion {
+  type: string;
+  intensity: number;
 }
 
 export async function analyzeVideoChunk(chunkUrl: string): Promise<VideoChunkAnalysis> {
@@ -12,7 +27,7 @@ export async function analyzeVideoChunk(chunkUrl: string): Promise<VideoChunkAna
   return Promise.resolve({ scenes: [], objects: [], emotions: [] });
 }
 
-export async function generateMusic(analysis: any): Promise<string> {
+export async function generateMusic(analysis: VideoChunkAnalysis): Promise<string> {
   // Mock implementation
   console.log("Generating music based on:", analysis);
   return Promise.resolve("https://example.com/music.mp3");
